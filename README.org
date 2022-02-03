@@ -1,0 +1,107 @@
+* mcpl - A wrapper for the MCPL file format & library
+
+MCPL stands for Monte Carlo Particle Lists. It is a binary file format
+to interoperate between different (typically Monte Carlo based)
+physics simulation software packages. The file format stores particle
+information like energy, direction, position etc.
+
+This library is a wrapper of the C library of the same name:
+
+https://mctools.github.io/mcpl/
+
+The full =particle_t= type is defined by:
+#+begin_src C
+  typedef struct {
+    double ekin;            /* kinetic energy [MeV]             */
+    double polarisation[3]; /* polarisation vector              */
+    double position[3];     /* position [cm]                    */
+    double direction[3];    /* momentum direction (unit vector) */
+    double time;            /* time-stamp [millisecond]         */
+    double weight;          /* weight or intensity              */
+    int32_t pdgcode;    /* MC particle number from the Particle Data Group (2112=neutron, 22=gamma, ...)        */
+    uint32_t userflags; /* User flags (if used, the file header should probably contain information about how). */
+  } mcpl_particle_t;
+#+end_src
+which (currently) maps to this Nim type:
+#+begin_src nim
+  particle_t* {.bycopy.} = object
+    ekin*: cdouble             ##  kinetic energy [MeV]
+    polarisation*: array[3, cdouble] ##  polarisation vector
+    position*: array[3, cdouble] ##  position [cm]
+    direction*: array[3, cdouble] ##  momentum direction (unit vector)
+    time*: cdouble             ##  time-stamp [millisecond]
+    weight*: cdouble           ##  weight or intensity
+    pdgcode*: cint          ##  MC particle number from the Particle Data Group (2112=neutron, 22=gamma, ...)
+    userflags*: cuint       ##  User flags (if used, the file header should probably contain information about how).
+#+end_src
+
+A wrapper around this object for a nicer & safer interface will be
+added.
+
+** Installation
+
+First of all make sure you have =mcpl= (the C library) installed, in
+particular the shared library =libmcpl.so=.
+
+In case you don't, we can build the library quickly ourselves:
+
+*** Build =libmcpl.so=
+
+To build the library you need =cmake=.
+
+First clone the git repository somewhere:
+#+begin_src sh
+cd ~/src
+git clone https://github.com/mctools/mcpl/
+#+end_src
+
+Now create some build directory:
+#+begin_src sh
+cd ~/src/mcpl
+mkdir build
+#+end_src
+
+and time to configure and build:
+#+begin_src sh
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/src/mcpl/build/ -DBUILD_WITHG4=OFF
+#+end_src
+(make sure to fit the install prefix path accordingly, if you didn't
+clone to =~/src=)
+where we disable Geant4 support.
+
+Now just make it:
+#+begin_src sh
+make install
+#+end_src
+(feel free to add =-j32= or whatever, but the library is small).
+
+This should have generated (among others) a =libmcpl.so= inside of the
+=build= directory.
+
+Place this wherever appropriate on your system (e.g. =/usr/local/lib=
+or =/opt/lib= or whatever you may use). Alternatively, tell your
+system where to find additional shared libraries by adding a
+=foo.conf= file to =/etc/ld.so.conf.d/foo.conf= with the full path to
+the directory (make sure to run a =ldconfig= after adding such a
+path!).
+
+If you don't want to do either of these things, just make sure to run
+any program using =mcpl= with:
+#+begin_src sh
+LD_LIBRARY_PATH=/path/to/libmcpl.so ./the_mcpl_using_binary
+#+end_src
+
+** Example
+
+Consider the example =examples/read_example.nim=. Compile it:
+#+begin_src sh
+nim c examples/read_example.nim
+#+end_src
+
+and now feed it the =examples/example.mcpl= file:
+#+begin_src sh
+examples/read_example examples/example.mcpl
+#+end_src
+
+
