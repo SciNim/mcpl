@@ -98,6 +98,8 @@ Consider the example =examples/read_example.nim=. Compile it:
 #+begin_src sh
 nim c examples/read_example.nim
 #+end_src
+which is a straight Nim port of the same C example:
+https://github.com/mctools/mcpl/blob/master/examples/rawexample_readmcpl.c
 
 and now feed it the =examples/example.mcpl= file:
 #+begin_src sh
