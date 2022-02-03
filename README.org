@@ -92,6 +92,14 @@ any program using =mcpl= with:
 LD_LIBRARY_PATH=/path/to/libmcpl.so ./the_mcpl_using_binary
 #+end_src
 
+
+*** Install the Nim library
+
+The Nim library is simply installed via:
+#+begin_src sh
+nimble install https://github.com/SciNim/mcpl
+#+end_src
+
 ** Example
 
 Consider the example =examples/read_example.nim=. Compile it:
